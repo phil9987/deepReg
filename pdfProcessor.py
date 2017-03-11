@@ -93,9 +93,10 @@ def main():
     for file in os.listdir('./RegulatoryData'):
         if file.endswith('.pdf') and docs.get(file, None) is None:
             pdfFilepath = os.path.join("./RegulatoryData", file)
-            docs[pdfFilepath](Document(pdfFilepath))
+            doc = Document(pdfFilepath)
+            docs[pdfFilepath] = doc
             print '.'
-            save_obj(docs.pop().tokens, file)
+            save_obj(doc, file)
     for filename, doc in docs.iteritems():
         freqdist = doc.getTopics()
         for (k, v) in freqdist.iteritems():
