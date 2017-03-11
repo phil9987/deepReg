@@ -11,6 +11,7 @@ import cPickle as pickle
 class Document:
     def __init__(self, filepath, tokens=None):
         self.filepath = filepath
+        self.filename = filepath.split("/")[-1]
         if(tokens == None):
             self.tokens = self.getPdfTextTokens(filepath)
         else:
