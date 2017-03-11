@@ -40,12 +40,12 @@ class Document:
 
 
 def save_obj(obj, name):
-    with open('deepReg/obj/' + name + '.pkl', 'wb') as f:
+    with open('obj/' + name + '.pkl', 'wb') as f:
         pickle.dump(obj, f, pickle.HIGHEST_PROTOCOL)
 
 
 def load_obj(name):
-    with open('deepReg/obj/' + name, 'rb') as f:
+    with open('obj/' + name, 'rb') as f:
         return pickle.load(f)
 
 
@@ -57,10 +57,10 @@ def cache_documents(docs):
 
 def loadFromCache():
     docs = {}
-    for file in os.listdir('./deepReg/obj'):
+    for file in os.listdir('./obj'):
         if file.endswith('.pkl'):
             pdfFilename = file.partition(".pkl")[0]
-            docs[pdfFilename] = Document(os.path.join('./deepReg/RegulatoryData', pdfFilename), load_obj(file))
+            docs[pdfFilename] = Document(os.path.join('./RegulatoryData', pdfFilename), load_obj(file))
     return docs
 
 
@@ -74,23 +74,23 @@ def getAllDocsWithTopic(docs, topic):
 
 def getAllCommonTopics(docs):
     topics = []
-    for pdfFilepath, doc in docs.iteritems():
+    for doc in docs:
         topics.append(set(doc.getTopics().keys()))
     return set.intersection(*topics)
 
 
 def getAllTopics(docs):
     topics = []
-    for pdfFilepath, doc in docs.iteritems():
+    for doc in docs:
         topics += doc.getTopics().keys()
     return topics
 
 
 def main():
     docs = loadFromCache()
-    for file in os.listdir('./deepReg/RegulatoryData'):
+    for file in os.listdir('./RegulatoryData'):
         if file.endswith('.pdf') and docs.get(file, None) is None:
-            pdfFilepath = os.path.join("./deepReg/RegulatoryData", file)
+            pdfFilepath = os.path.join("./RegulatoryData", file)
             docs[pdfFilepath](Document(pdfFilepath))
             print '.'
             save_obj(docs.pop().tokens, file)
@@ -103,7 +103,13 @@ def main():
     for pdfFilePath, doc in tradingDocs.iteritems():
         print doc.filepath
 
-    commonTopics = getAllCommonTopics()
+    threeDocs = list(tradingDocs.values())[:3]
+    for doc in threeDocs:
+        print doc.getTopics().keys()
+
+    commonTopics = getAllCommonTopics(threeDocs)
+    for topic in commonTopics:
+        print topic
 
 
 if __name__ == "__main__":
