@@ -67,10 +67,10 @@ def loadFromCache():
 
 
 def getAllDocsWithTopic(docs, topic):
-    relevantDocs = {}
+    relevantDocs = []
     for pdfFilepath, doc in docs.iteritems():
         if topic in doc.getTopics().keys():
-            relevantDocs[pdfFilepath] = doc
+            relevantDocs.append(doc)
     return relevantDocs
 
 
