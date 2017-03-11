@@ -1,6 +1,9 @@
 from appJar import gui
 import os
 import cPickle as pickle
+import PyPDF2 as pypdf
+import re
+
 
 import pdfProcessor
 from pdfProcessor import Document
@@ -24,11 +27,78 @@ def load_all_documents():
             pdfProcessor.save_obj(new_doc.tokens, file)
     return docs
 
+def do_nothing():
+    return
+
 def inspect_doc(asd):
     docs = app.getListItems("docs")
     if len(docs)> 0:
         doc = docs[0]
         print "inspect: " + doc
+
+        relevant_topics = []
+
+        for (t,d) in graph_edges:
+            if(d == doc):
+                print t
+                relevant_topics.append(t)
+
+        if not relevant_topics:
+            return
+
+        topic_1 = relevant_topics[0]
+
+        text_results = []
+
+        pdfFileObj = open("RegulatoryData/" + doc, 'rb')
+        pdfReader = pypdf.PdfFileReader(pdfFileObj)
+        text = ""
+        for i in range(0, pdfReader.numPages):
+            pageObj = pdfReader.getPage(i)
+            text = pageObj.extractText()
+            #search text for keyword
+            index = text.find(topic_1)
+            if(index > -1):
+                left_border = index-300;
+                if(left_border < 0):
+                    left_border = 0
+                right_border = index+300;
+                if(right_border > len(text)):
+                    right_border = len(text)
+                result_snippet = text[left_border:right_border]
+
+                result_snippet = ' '.join(result_snippet.split())
+                result_snippet = re.sub("(.{100})", "\\1\n", result_snippet, 0, re.DOTALL)
+
+                text_results.append(result_snippet)
+
+            if len(text_results) > 30:
+                break
+
+
+        app2=gui()
+        app2.setGeometry(700,400)
+
+       
+
+        app2.startPagedWindow(topic_1)
+
+        window_counter = 0
+        for res in text_results:
+            idstring = "win_id_" + str(window_counter)
+            button_id = "button_id_" + str(window_counter)
+            window_counter += 1
+            app2.startPage()
+            res = "..." + res + "..."
+            app2.addLabel(idstring, res)
+            app2.createRightClickMenu("mymenu"+str(window_counter), showInBar=False)
+            app2.addMenuItem("mymenu"+str(window_counter), "Approve", func=None, shortcut=None, underline=-1)
+            app2.setLabelRightClick(idstring,"mymenu"+str(window_counter))
+            app2.stopPage()
+
+        app2.stopPagedWindow()
+
+        app2.go()
 
 docs = load_all_documents()
 print "Docs loaded"
@@ -59,12 +129,6 @@ def select_topic(btn):
                     if not d in document_nodes:
                         document_nodes.append(d)
                     graph_edges.append((topic,d))
-
-
-
-
-
-
 
     save_obj(topic_nodes,"topic_nodes")
     save_obj(document_nodes,"document_nodes")
