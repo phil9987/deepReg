@@ -1,3 +1,7 @@
 PyPDF2
 nltk
-
+appJar
+networkx
+matplotlib
+cPickle
+PIL
