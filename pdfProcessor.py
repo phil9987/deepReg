@@ -7,6 +7,7 @@ from nltk.probability import FreqDist
 import os
 import cPickle as pickle
 
+
 class Document:
     def __init__(self, filepath, tokens=None):
         self.filepath = filepath
