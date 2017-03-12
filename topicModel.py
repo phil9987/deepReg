@@ -66,11 +66,12 @@ def main():
     corpus = [dictionary.doc2bow(doc) for doc in docs]
     corpora.MmCorpus.serialize("temp/regulations.dict", corpus)
 
-    lda = models.LdaModel(corpus, num_topics=30, id2word=dictionary)
+    lda = models.LdaModel(corpus, passes=20, chunksize=7, iterations=50, num_topics=20, id2word=dictionary)
     for doc in corpus:
         print lda.get_document_topics(doc)
 
     print lda.print_topics(30)
+    lda.save("temp/lda.model_20passes_50iterations_7chunksize_20topics")
 
 
 
